@@ -12,10 +12,26 @@ function showError(message) {
 function createQuestionItem(question, index) {
   const li = document.createElement("li");
   const button = document.createElement("button");
+  const questionRow = document.createElement("div");
+  const indexEl = document.createElement("span");
+  const questionTextEl = document.createElement("span");
+  const answerPreviewEl = document.createElement("div");
 
   button.className = "question-item";
   button.type = "button";
-  button.innerHTML = `<span class="index">${index + 1}.</span> ${question.firstLine}`;
+  questionRow.className = "question-row";
+  indexEl.className = "index";
+  questionTextEl.className = "question-text";
+  answerPreviewEl.className = "answer-preview";
+
+  indexEl.textContent = `${index + 1}.`;
+  questionTextEl.textContent = question.firstLine;
+  answerPreviewEl.textContent = question.answerPreview || "(no answer yet)";
+
+  questionRow.appendChild(indexEl);
+  questionRow.appendChild(questionTextEl);
+  button.appendChild(questionRow);
+  button.appendChild(answerPreviewEl);
 
   button.addEventListener("click", async () => {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });

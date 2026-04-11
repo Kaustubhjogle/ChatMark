@@ -1,8 +1,16 @@
 {
   "manifest_version": 3,
-  "name": "ChatGPT Question Navigator",
-  "description": "Shows your questions in the current ChatGPT chat and jumps to them.",
+  "name": "ChatMark",
+  "description": "Shows your questions in the currentchat and jumps to them.",
   "version": "1.0.0",
+
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+
   "permissions": ["activeTab", "tabs"],
   "host_permissions": [
     "https://chatgpt.com/*",
@@ -10,7 +18,11 @@
   ],
   "action": {
     "default_title": "Question Navigator",
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon128.png",
+      "32": "icon128.png"
+    }
   },
   "content_scripts": [
     {

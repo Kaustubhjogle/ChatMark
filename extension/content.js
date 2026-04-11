@@ -1,10 +1,24 @@
 function normalizeFirstLine(text) {
-  const firstLine = text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .find(Boolean) || "(empty question)";
+  const collapsed = (text || "")
+    .replace(/\s+/g, " ")
+    .replace(/^[`"'“”‘’\s]+/, "")
+    .trim();
 
-  return firstLine.length > 140 ? `${firstLine.slice(0, 137)}...` : firstLine;
+  if (!collapsed) {
+    return "(empty question)";
+  }
+
+  const meaningful = /[A-Za-z0-9]/.test(collapsed) ? collapsed : normalizeSnippet(text, 90);
+  return meaningful.length > 90 ? `${meaningful.slice(0, 87)}...` : meaningful;
+}
+
+function normalizeSnippet(text, limit) {
+  const collapsed = (text || "").replace(/\s+/g, " ").trim();
+  if (!collapsed) {
+    return "";
+  }
+
+  return collapsed.length > limit ? `${collapsed.slice(0, limit - 3)}...` : collapsed;
 }
 
 function getUserMessageNodes() {
@@ -24,6 +38,7 @@ function getUserMessageNodes() {
 }
 
 function getQuestions() {
+  const allMessageNodes = Array.from(document.querySelectorAll('[data-message-author-role]'));
   const nodes = getUserMessageNodes();
 
   return nodes
@@ -35,10 +50,32 @@ function getQuestions() {
 
       return {
         index,
-        firstLine: normalizeFirstLine(text)
+        firstLine: normalizeFirstLine(text),
+        answerPreview: getAnswerPreviewForNode(node, allMessageNodes)
       };
     })
     .filter(Boolean);
+}
+
+function getAnswerPreviewForNode(userNode, allMessageNodes) {
+  const startIndex = allMessageNodes.indexOf(userNode);
+  if (startIndex === -1) {
+    return "(no answer yet)";
+  }
+
+  for (let i = startIndex + 1; i < allMessageNodes.length; i += 1) {
+    const node = allMessageNodes[i];
+    const role = node.getAttribute("data-message-author-role");
+    if (role === "assistant") {
+      const text = normalizeSnippet(node.innerText || node.textContent || "", 70);
+      return text || "(no answer yet)";
+    }
+    if (role === "user") {
+      break;
+    }
+  }
+
+  return "(no answer yet)";
 }
 
 function scrollToQuestion(index) {
