@@ -3,18 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Question Navigator</title>
+    <title>ChatMark</title>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <main class="container">
-      <h1>Your Questions</h1>
-      <p id="subtitle" class="subtitle">Loading questions from this chat...</p>
-      <ul id="questionList" class="question-list"></ul>
-      <p id="emptyState" class="empty hidden">
-        No questions found yet in this chat.
-      </p>
-      <p id="errorState" class="error hidden"></p>
+    <main class="shell">
+      <section class="panel">
+        <header class="header">
+          <div>
+            <h1>The Chats</h1>
+            <p id="subtitle" class="subtitle">Loading prompts from this chat...</p>
+          </div>
+        </header>
+        <ul id="questionList" class="question-list"></ul>
+        <p id="emptyState" class="empty hidden">
+          No questions found yet in this chat.
+        </p>
+        <p id="errorState" class="error hidden"></p>
+      </section>
     </main>
     <script src="popup.js"></script>
   </body>

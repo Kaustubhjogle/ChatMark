@@ -64,7 +64,7 @@ async function loadQuestions() {
 
   chrome.tabs.sendMessage(tab.id, { action: "getQuestions" }, (response) => {
     if (chrome.runtime.lastError) {
-      showError("Could not connect to the ChatGPT page. Reload the tab and try again.");
+      showError("Could not connect to your chats. Reload the tab and try again.");
       return;
     }
 
