@@ -168,6 +168,29 @@ h1 {
   color: var(--answer-muted);
 }
 
+.reload-button {
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--item-bg);
+  color: var(--text);
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 150ms var(--ease-out), border-color 180ms var(--ease-out), background-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
+}
+
+.reload-button:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  transform: translateY(-1px);
+}
+
+.reload-button:active {
+  transform: scale(0.98);
+}
+
 .empty,
 .error {
   margin: 10px 0 0;

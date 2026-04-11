@@ -2,11 +2,17 @@ const subtitleEl = document.getElementById("subtitle");
 const questionListEl = document.getElementById("questionList");
 const emptyStateEl = document.getElementById("emptyState");
 const errorStateEl = document.getElementById("errorState");
+const reloadButtonEl = document.getElementById("reloadButton");
 
-function showError(message) {
+function showError(message, showReload = false) {
   subtitleEl.textContent = "Unable to read this page.";
   errorStateEl.textContent = message;
   errorStateEl.classList.remove("hidden");
+  if (showReload) {
+    reloadButtonEl.classList.remove("hidden");
+  } else {
+    reloadButtonEl.classList.add("hidden");
+  }
 }
 
 function createQuestionItem(question, index) {
@@ -64,7 +70,7 @@ async function loadQuestions() {
 
   chrome.tabs.sendMessage(tab.id, { action: "getQuestions" }, (response) => {
     if (chrome.runtime.lastError) {
-      showError("Could not connect to your chats. Reload the tab and try again.");
+      showError("Could not connect to your chats. Reload the tab and try again.", true);
       return;
     }
 
@@ -90,4 +96,14 @@ async function loadQuestions() {
 
 loadQuestions().catch((error) => {
   showError(error?.message || "Unexpected error.");
+});
+
+reloadButtonEl.addEventListener("click", async () => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id) {
+    return;
+  }
+
+  await chrome.tabs.reload(tab.id);
+  window.close();
 });
