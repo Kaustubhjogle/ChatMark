@@ -1,5 +1,24 @@
+function stripLeadingUiLabels(text) {
+  let cleaned = text || "";
+
+  // Some UIs prepend accessibility/action labels like
+  // "Show thinking Gemini said" before actual message text.
+  for (let i = 0; i < 3; i += 1) {
+    const next = cleaned
+      .replace(/^\s*show\s+thinking\s*:?\s*/i, "")
+      .replace(/^\s*(you|gemini|claude)\s+said\s*:?\s*/i, "")
+      .trimStart();
+    if (next === cleaned) {
+      break;
+    }
+    cleaned = next;
+  }
+
+  return cleaned;
+}
+
 function normalizeFirstLine(text) {
-  const cleaned = (text || "").replace(/^\s*(you|gemini|claude)\s+said\s*:?\s*/i, "");
+  const cleaned = stripLeadingUiLabels(text);
   const collapsed = cleaned
     .replace(/\s+/g, " ")
     .replace(/^[`"'“”‘’\s]+/, "")
@@ -14,7 +33,7 @@ function normalizeFirstLine(text) {
 }
 
 function normalizeSnippet(text, limit) {
-  const collapsed = (text || "").replace(/\s+/g, " ").trim();
+  const collapsed = stripLeadingUiLabels(text).replace(/\s+/g, " ").trim();
   if (!collapsed) {
     return "";
   }
@@ -312,17 +331,247 @@ function getGenericTurns() {
     .filter((turn) => (turn.role === "user" || turn.role === "assistant") && turn.text);
 }
 
+function dedupeTurnsByNode(turns) {
+  const seen = new Set();
+  const deduped = [];
+
+  for (const turn of turns) {
+    if (!turn?.node || seen.has(turn.node)) {
+      continue;
+    }
+    seen.add(turn.node);
+    deduped.push(turn);
+  }
+
+  return deduped;
+}
+
+function getTurnCounts(turns) {
+  const counts = { user: 0, assistant: 0 };
+  for (const turn of turns) {
+    if (turn.role === "user") {
+      counts.user += 1;
+    }
+    if (turn.role === "assistant") {
+      counts.assistant += 1;
+    }
+  }
+  return counts;
+}
+
+function isTurnsUsable(turns) {
+  const counts = getTurnCounts(turns);
+  return counts.user > 0 && counts.assistant > 0;
+}
+
+function scoreTurns(turns) {
+  const counts = getTurnCounts(turns);
+  const total = turns.length;
+  const paired = Math.min(counts.user, counts.assistant);
+  return paired * 10 + total;
+}
+
+function chooseBetterTurns(baseTurns, candidateTurns) {
+  const base = sortTurnsByDom(dedupeTurnsByNode(baseTurns || []));
+  const candidate = sortTurnsByDom(dedupeTurnsByNode(candidateTurns || []));
+
+  if (!base.length) {
+    return candidate;
+  }
+  if (!candidate.length) {
+    return base;
+  }
+
+  if (isTurnsUsable(candidate) && !isTurnsUsable(base)) {
+    return candidate;
+  }
+  if (isTurnsUsable(base) && !isTurnsUsable(candidate)) {
+    return base;
+  }
+
+  return scoreTurns(candidate) > scoreTurns(base) ? candidate : base;
+}
+
+function getProviderSelectorCatalog(provider) {
+  if (provider === "claude") {
+    return {
+      user: [
+        '[data-testid="user-message"]',
+        '[data-test-id="user-message"]',
+        '[data-testid*="user-message"]',
+        '[data-test-id*="user-message"]'
+      ],
+      assistant: [
+        ".font-claude-response",
+        ".font-claude-response-body",
+        '[data-is-streaming] .font-claude-response',
+        '[data-testid="message-content"]',
+        '[data-test-id="message-content"]',
+        '[data-testid="assistant-message"]',
+        '[data-test-id="assistant-message"]',
+        '[aria-label*="Claude said"]'
+      ]
+    };
+  }
+
+  if (provider === "gemini") {
+    return {
+      user: [
+        "user-query",
+        '[data-test-id="user-message"]',
+        '[aria-label*="You said"]'
+      ],
+      assistant: [
+        "model-response",
+        '[data-test-id="model-response"]',
+        '[aria-label*="Gemini"]'
+      ]
+    };
+  }
+
+  if (provider === "chatgpt") {
+    return {
+      user: ['[data-message-author-role="user"]'],
+      assistant: ['[data-message-author-role="assistant"]']
+    };
+  }
+
+  return {
+    user: [
+      '[data-message-author-role="user"]',
+      '[data-testid*="user-message"]',
+      '[data-test-id*="user-message"]'
+    ],
+    assistant: [
+      '[data-message-author-role="assistant"]',
+      '[data-testid*="assistant-message"]',
+      '[data-test-id*="assistant-message"]',
+      '[data-testid="message-content"]',
+      '[data-test-id="message-content"]',
+      '[class*="response"]'
+    ]
+  };
+}
+
+function getTurnsFromSelectorCatalog(provider) {
+  const catalog = getProviderSelectorCatalog(provider);
+  const userNodes = getNodesFromSelectors(catalog.user);
+  const assistantNodes = getNodesFromSelectors(catalog.assistant);
+
+  const turns = [
+    ...userNodes.map((node) => ({ role: "user", node, text: getTextFromNode(node) })),
+    ...assistantNodes.map((node) => ({ role: "assistant", node, text: getTextFromNode(node) }))
+  ].filter((turn) => turn.text);
+
+  return sortTurnsByDom(dedupeTurnsByNode(turns));
+}
+
+function getClosestMessageNodeFromActionBar(actionBar) {
+  if (!actionBar) {
+    return null;
+  }
+
+  const parent = actionBar.parentElement;
+  if (!parent) {
+    return null;
+  }
+
+  if (parent.previousElementSibling) {
+    return parent.previousElementSibling;
+  }
+  if (actionBar.previousElementSibling) {
+    return actionBar.previousElementSibling;
+  }
+
+  let cursor = parent;
+  for (let i = 0; i < 8 && cursor; i += 1) {
+    if (cursor.previousElementSibling) {
+      return cursor.previousElementSibling;
+    }
+    cursor = cursor.parentElement;
+  }
+
+  return null;
+}
+
+function getTurnsFromActionBars() {
+  const actionBars = getNodesFromSelectors([
+    '[role="group"][aria-label*="Message actions"]'
+  ]);
+
+  const turns = actionBars
+    .map((bar) => {
+      const container = getClosestMessageNodeFromActionBar(bar);
+      if (!container) {
+        return null;
+      }
+
+      const text = getTextFromNode(container);
+      if (!text || text.length < 3) {
+        return null;
+      }
+
+      return {
+        role: inferRoleFromNode(container),
+        node: container,
+        text
+      };
+    })
+    .filter(Boolean);
+
+  const resolvedTurns = turns.map((turn) => {
+    if (turn.role === "user" || turn.role === "assistant") {
+      return turn;
+    }
+
+    const text = turn.text.toLowerCase();
+    if (text.includes("give positive feedback") || text.includes("give negative feedback")) {
+      return { ...turn, role: "assistant" };
+    }
+    return turn;
+  }).filter((turn) => turn.role === "user" || turn.role === "assistant");
+
+  return sortTurnsByDom(dedupeTurnsByNode(resolvedTurns));
+}
+
+function getDynamicFallbackTurns(provider) {
+  const fromCatalog = getTurnsFromSelectorCatalog(provider);
+  const fromActionBars = getTurnsFromActionBars();
+  const fromInferred = sortTurnsByDom(dedupeTurnsByNode(turnsFromNodesWithInferredRoles(getNodesFromSelectors([
+    '[aria-label*="said"]',
+    '[data-testid*="message"]',
+    '[data-test-id*="message"]',
+    '[class*="message"]',
+    '[class*="response"]'
+  ]))));
+
+  return chooseBetterTurns(chooseBetterTurns(fromCatalog, fromActionBars), fromInferred);
+}
+
 function getTurns() {
   const provider = getHostProvider();
+  let primaryTurns = [];
+
   if (provider === "chatgpt") {
-    return getTurnsForChatGPT();
+    primaryTurns = getTurnsForChatGPT();
   }
   if (provider === "gemini") {
-    return getTurnsForGemini();
+    primaryTurns = getTurnsForGemini();
   }
   if (provider === "claude") {
-    return getTurnsForClaude();
+    primaryTurns = getTurnsForClaude();
   }
+  if (provider === "unknown") {
+    primaryTurns = getGenericTurns();
+  }
+
+  const fallbackTurns = getDynamicFallbackTurns(provider);
+  const bestTurns = chooseBetterTurns(primaryTurns, fallbackTurns);
+
+  if (bestTurns.length) {
+    return bestTurns;
+  }
+
   return getGenericTurns();
 }
 
