@@ -14,7 +14,6 @@
   --accent: #0b6d66;
   --accent-soft: #d9f4f1;
   --item-bg: #ffffff;
-  --answer-muted: #90a0b5;
   --error: #b91c1c;
   --shadow-soft: 0 14px 30px rgba(18, 32, 60, 0.12);
   --shadow-item: 0 6px 16px rgba(18, 32, 60, 0.08);
@@ -162,12 +161,6 @@ h1 {
   overflow-wrap: anywhere;
 }
 
-.answer-preview {
-  margin-top: 6px;
-  font-size: 12px;
-  color: var(--answer-muted);
-}
-
 .reload-button {
   margin-top: 10px;
   border: 1px solid var(--line);
@@ -225,7 +218,6 @@ h1 {
     --accent: #d9d9df;
     --accent-soft: #202024;
     --item-bg: #111113;
-    --answer-muted: #8d8d96;
     --error: #ff8b8b;
     --shadow-soft: 0 22px 44px rgba(0, 0, 0, 0.58);
     --shadow-item: 0 12px 28px rgba(0, 0, 0, 0.45);
