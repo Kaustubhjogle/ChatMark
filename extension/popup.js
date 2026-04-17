@@ -38,6 +38,7 @@ function createQuestionItem(question, index) {
   const questionRow = document.createElement("div");
   const indexEl = document.createElement("span");
   const questionTextEl = document.createElement("span");
+  const answerPreviewEl = document.createElement("div");
 
   button.className = "question-item";
   button.type = "button";
@@ -45,13 +46,16 @@ function createQuestionItem(question, index) {
   questionRow.className = "question-row";
   indexEl.className = "index";
   questionTextEl.className = "question-text";
+  answerPreviewEl.className = "answer-preview";
 
   indexEl.textContent = `${index + 1}.`;
   questionTextEl.textContent = question.firstLine;
+  answerPreviewEl.textContent = question.answerPreview || "(no answer yet)";
 
   questionRow.appendChild(indexEl);
   questionRow.appendChild(questionTextEl);
   button.appendChild(questionRow);
+  button.appendChild(answerPreviewEl);
 
   li.appendChild(button);
   return li;

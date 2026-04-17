@@ -6,12 +6,12 @@ ChatMark is a Chrome extension that helps users navigate their own prompts in su
 
 ## What data ChatMark accesses
 
-On supported chat URLs, ChatMark reads visible page content needed to identify user prompt messages and provide jump navigation.
+On supported chat URLs, ChatMark reads visible page content needed to identify user prompt messages and short snippets of the first following assistant replies for preview.
 
 ## What ChatMark does with data
 
 - Processes chat content locally in the browser.
-- Uses the data only to render the prompt list and support scroll-to-message navigation.
+- Uses the data only to render the prompt list, short answer previews, and scroll-to-message navigation.
 
 ## What ChatMark does not do
 
