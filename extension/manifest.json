@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "ChatMark",
+  "name": "PromptPane",
   "description": "Lists your prompts with short reply previews in the current chat and jumps to them.",
   "version": "1.0.0",
 
