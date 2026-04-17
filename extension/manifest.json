@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ChatMark",
-  "description": "Shows your questions in the currentchat and jumps to them.",
+  "description": "Lists your prompts with short reply previews in the current chat and jumps to them.",
   "version": "1.0.0",
 
   "icons": {
@@ -11,10 +11,12 @@
     "128": "icon128.png"
   },
 
-  "permissions": ["activeTab", "tabs"],
+  "permissions": ["activeTab"],
   "host_permissions": [
-    "https://chatgpt.com/*",
-    "https://chat.openai.com/*"
+    "https://chatgpt.com/c/*",
+    "https://chat.openai.com/c/*",
+    "https://gemini.google.com/app*",
+    "https://claude.ai/chat/*"
   ],
   "action": {
     "default_title": "Question Navigator",
@@ -27,8 +29,10 @@
   "content_scripts": [
     {
       "matches": [
-        "https://chatgpt.com/*",
-        "https://chat.openai.com/*"
+        "https://chatgpt.com/c/*",
+        "https://chat.openai.com/c/*",
+        "https://gemini.google.com/app*",
+        "https://claude.ai/chat/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"
