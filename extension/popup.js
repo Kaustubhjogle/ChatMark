@@ -3,6 +3,21 @@ const questionListEl = document.getElementById("questionList");
 const emptyStateEl = document.getElementById("emptyState");
 const errorStateEl = document.getElementById("errorState");
 const reloadButtonEl = document.getElementById("reloadButton");
+const SUPPORTED_HOSTS = new Set([
+  "chatgpt.com",
+  "chat.openai.com",
+  "gemini.google.com",
+  "claude.ai"
+]);
+
+function isSupportedChatUrl(url) {
+  try {
+    const host = new URL(url).hostname;
+    return SUPPORTED_HOSTS.has(host);
+  } catch (_error) {
+    return false;
+  }
+}
 
 function showError(message, showReload = false) {
   subtitleEl.textContent = "Unable to read this page.";
@@ -59,12 +74,12 @@ async function loadQuestions() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   if (!tab?.id || !tab.url) {
-    showError("Open a ChatGPT chat, then click the extension again.");
+    showError("Open a ChatGPT, Gemini, or Claude chat, then click the extension again.");
     return;
   }
 
-  if (!tab.url.includes("chatgpt.com") && !tab.url.includes("chat.openai.com")) {
-    showError("This extension works only on ChatGPT pages.");
+  if (!isSupportedChatUrl(tab.url)) {
+    showError("This extension works on ChatGPT, Gemini, and Claude pages.");
     return;
   }
 
