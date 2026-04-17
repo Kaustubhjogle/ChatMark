@@ -1,19 +1,19 @@
-# ChatMark Privacy Policy
+# PromptPane Privacy Policy
 
 Effective date: April 17, 2026
 
-ChatMark is a Chrome extension that helps users navigate their own prompts in supported AI chat pages.
+PromptPane is a Chrome extension that helps users navigate their own prompts in supported AI chat pages.
 
-## What data ChatMark accesses
+## What data PromptPane accesses
 
-On supported chat URLs, ChatMark reads visible page content needed to identify user prompt messages and short snippets of the first following assistant replies for preview.
+On supported chat URLs, PromptPane reads visible page content needed to identify user prompt messages and short snippets of the first following assistant replies for preview.
 
-## What ChatMark does with data
+## What PromptPane does with data
 
 - Processes chat content locally in the browser.
 - Uses the data only to render the prompt list, short answer previews, and scroll-to-message navigation.
 
-## What ChatMark does not do
+## What PromptPane does not do
 
 - Does not transmit chat content to external servers.
 - Does not store chat content remotely.
@@ -22,16 +22,17 @@ On supported chat URLs, ChatMark reads visible page content needed to identify u
 
 ## Data sharing
 
-ChatMark does not share user data with third parties.
+PromptPane does not share user data with third parties.
 
 ## Data retention
 
-ChatMark does not persist chat content outside the current page context required for operation.
+PromptPane does not persist chat content outside the current page context required for operation.
 
 ## Security
 
-ChatMark has no remote code loading and no external network requests in normal operation.
+PromptPane has no remote code loading and no external network requests in normal operation.
 
 ## Contact
 
-Developer contact: Add your support email in the Chrome Web Store listing and keep this policy updated to match extension behavior.
+Developer contact: 
+- kaustubhrjogle@gmail.com
